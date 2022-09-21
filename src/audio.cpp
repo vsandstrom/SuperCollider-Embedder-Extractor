@@ -10,6 +10,8 @@ int SuperColliderHeader::parseWaveHeader(){
 
 	bool dataFound = false;
 	bool bextFound = false;
+
+	junkSize = 0;
 	
 	char *bextChunk = 0; // ptr to store bext chunk
 	
@@ -32,13 +34,15 @@ int SuperColliderHeader::parseWaveHeader(){
 	}
 	
 	while (!dataFound) {
-		bool bextFound = false;
+		/* bool bextFound = false; */
 		// loop until 'data' chunk is found
 		
 		fread(&cursor, 4, 1, wave);
 
 		if ( cursor == 0x20746d66 ) {
 			// if fmt
+			
+			printf("fmt found");
 			
 			format.formatID = cursor;
 			fread(&format.formatSize, 4, 1, wave);
@@ -52,15 +56,18 @@ int SuperColliderHeader::parseWaveHeader(){
 		} else if ( cursor == 0x74786562 ) { 
 			// if bext
 			
+			printf("bext found");
 			b_extension.bextID = cursor;
 			fread(&b_extension.bextSize, 4, 1, wave);
 			// Unnecessary malloc and read of bext chunk already present in file
 			bextChunk = (char*)malloc(b_extension.bextSize);
 			fread(bextChunk, b_extension.bextSize, 1, wave);
+			bextFound = true;
 
 		} else if ( cursor == 0x61746164 ) {
 			// if data
 			
+			printf("data found");
 			data.dataID = cursor;
 			fread(&data.dataSize, 4, 1, wave);
 			/* printf("%i\n", data.dataSize); */
@@ -71,10 +78,20 @@ int SuperColliderHeader::parseWaveHeader(){
 		} else {
 			// if some junk chunk is trailing bext chunk
 			
+			printf("junk found");
 			fread(&cursor, 4, 1, wave); // read size of junk chunk
+			junkSize += cursor;
 			fseek(wave, cursor, SEEK_CUR); // skip junk chunk
 		}
 	}
+	
+	waveheader.fileSize -= junkSize;
+
+	if (!bextFound) {
+		b_extension.bextID = 0x74786562;
+		b_extension.bextSize = 0;
+	}
+
 
 	if (format.bps == 16) data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 16));
 	else if (format.bps == 24) data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 24));
@@ -89,10 +106,7 @@ int SuperColliderHeader::parseWaveHeader(){
 
 
 int SuperColliderHeader::parseSCD() {
-	uint32_t cursor = 0;
-	char buffer[4]{0};
 	unsigned char validBytes = 0;
-	scdFile = 0;
 
 	fseek(scdFile, 0L, SEEK_END);
 	scdSize = ftell(scdFile);
@@ -119,14 +133,12 @@ int SuperColliderHeader::writeNewFile() {
 	int32_t sizeDiff = scdSize - b_extension.bextSize;
 	waveheader.fileSize += sizeDiff;
 
-	FILE * outFile;
+	FILE * outFile = fopen(path, "w");
 	if ( outFile == nullptr ){
 		return 8;
 	}
 
 	// WRITE NEW FILE TO DISK!
-
-	outFile = fopen(path, "w");
 
 	// TODO: error handling here:
 	// check if number of objects is same as written, (which is '1' on all counts)
@@ -175,6 +187,11 @@ SuperColliderHeader::SuperColliderHeader(
 		FILE* wave, FILE* scdFile, char* path) : wave { wave }, scdFile { scdFile }, path {path}
 {};
 
+SuperColliderHeader::~SuperColliderHeader() {
+	free(bext);
+	free(data.dataChunk);
+}
+
 
 int SuperColliderHeader::process() {
 	if (wave == nullptr || scdFile == nullptr) {
@@ -182,11 +199,18 @@ int SuperColliderHeader::process() {
 	}
 	int err;
 	err = parseWaveHeader();
-	if (err != 0) error(err); return 5;
+	if (err != 0) {
+		error(err); return 5;
+	}
 	err = parseSCD();
-	if (err != 0) error(err); return 6;
+	if (err != 0) {
+		error(err); return 6;
+	}
 	err = writeNewFile();
-	if (err != 0) error(err); return 9;
+	if (err != 0) {
+		error(err); return 9;
+	}
+
 
 	return 0;
 }

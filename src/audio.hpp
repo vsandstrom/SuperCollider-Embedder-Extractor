@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <malloc/_malloc.h>
 
+#pragma once
+
 struct WAVEHEADER {
 	int32_t riffID; //  0x46464952 'FFIR' ('RIFF')
 	int32_t fileSize; // 
@@ -37,6 +39,7 @@ class SuperColliderHeader {
 	FILE* wave, *scdFile;
 	char* bext;
 	uint32_t scdSize;
+	uint32_t junkSize;
 	WAVEHEADER waveheader;
 	B_EXTENSION b_extension;
 	FORMAT format;
@@ -54,6 +57,8 @@ class SuperColliderHeader {
 
 	public:
 	SuperColliderHeader(FILE* wave, FILE* scdFile, char* path);
+
+	~SuperColliderHeader();
 
 	int process();
 };
