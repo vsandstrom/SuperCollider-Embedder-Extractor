@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <malloc/_malloc.h>
 
-/* using namespace audio; */
+// TODO: Understand why allocationg and parsing of data-chunk does not work properly
 
 int SuperColliderHeader::parseWaveHeader(){
 	uint32_t cursor;
@@ -42,7 +42,7 @@ int SuperColliderHeader::parseWaveHeader(){
 		if ( cursor == 0x20746d66 ) {
 			// if fmt
 			
-			printf("fmt found");
+			printf("fmt found\n");
 			
 			format.formatID = cursor;
 			fread(&format.formatSize, 4, 1, wave);
@@ -56,7 +56,7 @@ int SuperColliderHeader::parseWaveHeader(){
 		} else if ( cursor == 0x74786562 ) { 
 			// if bext
 			
-			printf("bext found");
+			printf("bext found\n");
 			b_extension.bextID = cursor;
 			fread(&b_extension.bextSize, 4, 1, wave);
 			// Unnecessary malloc and read of bext chunk already present in file
@@ -67,10 +67,10 @@ int SuperColliderHeader::parseWaveHeader(){
 		} else if ( cursor == 0x61746164 ) {
 			// if data
 			
-			printf("data found");
+			printf("data found\n");
 			data.dataID = cursor;
 			fread(&data.dataSize, 4, 1, wave);
-			/* printf("%i\n", data.dataSize); */
+			printf("Data size: %i\n", data.dataSize);
 			
 
 			dataFound = 1;
@@ -78,7 +78,7 @@ int SuperColliderHeader::parseWaveHeader(){
 		} else {
 			// if some junk chunk is trailing bext chunk
 			
-			printf("junk found");
+			printf("junk found\n");
 			fread(&cursor, 4, 1, wave); // read size of junk chunk
 			junkSize += cursor;
 			fseek(wave, cursor, SEEK_CUR); // skip junk chunk
@@ -93,13 +93,21 @@ int SuperColliderHeader::parseWaveHeader(){
 	}
 
 
-	if (format.bps == 16) data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 16));
-	else if (format.bps == 24) data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 24));
+	if (format.bps == 16) {
+		data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 16)); 
+		printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk));
+	}
+	else if (format.bps == 24) {
+		data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 24));
+		printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk));
+	}
 
-	if (data.dataChunk == nullptr) return 7;
-
-	// should probably check if data has been read properly
 	fread(data.dataChunk, data.dataSize, 1, wave);
+
+	// check if data has been read properly
+	if (ferror(wave)) {
+		return 7;
+	}
 
 	return 0;
 }
@@ -108,6 +116,7 @@ int SuperColliderHeader::parseWaveHeader(){
 int SuperColliderHeader::parseSCD() {
 	unsigned char validBytes = 0;
 
+	// get scdFile size in bytes
 	fseek(scdFile, 0L, SEEK_END);
 	scdSize = ftell(scdFile);
 	rewind(scdFile);
@@ -115,15 +124,21 @@ int SuperColliderHeader::parseSCD() {
 	// Allign to next 32bit block
 	bext = (char*)malloc(scdSize + (scdSize % 4));
 
-	validBytes = fread(bext, 4, 1, scdFile);
-	if (validBytes != scdSize) {
+	// 
+	validBytes = fread(bext, sizeof(size_t), scdSize, scdFile);
+	// printf("%s", bext);
+	printf("validBytes: %i\nscdsize: %i\n", validBytes, scdSize);
+	// Check if written bytes correspond to scdSize
+	if (ferror(scdFile)) {
 		return 3;
 	}
 
+	printf("%s\n", bext);
+
 	// Pad the end of the file with NULL
-	for (int i = scdSize, n = scdSize + (scdSize % 4); i < n; i++){
-		bext[i] = 0x00;
-	}
+	/* for (int i = scdSize+1, n = scdSize + (scdSize % 4); i < n; i++){ */
+	/* 	bext[i] = 0x00; */
+	/* } */
 	return 0;
 }
 
@@ -132,6 +147,8 @@ int SuperColliderHeader::writeNewFile() {
 	
 	int32_t sizeDiff = scdSize - b_extension.bextSize;
 	waveheader.fileSize += sizeDiff;
+
+
 
 	FILE * outFile = fopen(path, "w");
 	if ( outFile == nullptr ){
@@ -142,13 +159,13 @@ int SuperColliderHeader::writeNewFile() {
 
 	// TODO: error handling here:
 	// check if number of objects is same as written, (which is '1' on all counts)
-	if (fwrite(&waveheader, sizeof(WAVEHEADER), 1, outFile) < 1) return 10;
-	if (fwrite(&format, sizeof(FORMAT), 1, outFile) < 1) return 12;
-	if (fwrite(&b_extension, sizeof(B_EXTENSION), 1, outFile) < 1) return 13;
-	if (fwrite(bext, sizeof(b_extension.bextSize), 1, outFile) < 1) return 14;
+	if (fwrite(&waveheader, 4, 3, outFile) < 1) return 10;
+	if (fwrite(&format, 4, 5, outFile) < 1) return 12;
+	if (fwrite(&b_extension, 4, 2, outFile) < 1) return 13;
+	if (fwrite(bext, sizeof(scdSize), 1, outFile) < 1) return 14;
 	if (fwrite(&data.dataID, 4, 1, outFile) < 1) return 15;
 	if (fwrite(&data.dataSize, 4, 1, outFile) < 1) return 16;
-	if (fwrite(data.dataChunk, data.dataSize, 1, outFile) < 1) return 17;
+	if (fwrite(data.dataChunk, 1, data.dataSize, outFile) < 1) return 17;
 
 	return 0;
 }
