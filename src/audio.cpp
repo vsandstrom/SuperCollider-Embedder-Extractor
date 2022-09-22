@@ -94,11 +94,11 @@ int SuperColliderHeader::parseWaveHeader(){
 
 
 	if (format.bps == 16) {
-		data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 16)); 
+		data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 4)); 
 		printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk));
 	}
 	else if (format.bps == 24) {
-		data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 24));
+		data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 6));
 		printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk));
 	}
 
