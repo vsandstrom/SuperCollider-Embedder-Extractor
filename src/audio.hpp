@@ -5,31 +5,31 @@
 #pragma once
 
 struct WAVEHEADER {
-	int32_t riffID; //  0x46464952 'FFIR' ('RIFF')
-	int32_t fileSize; // 
-	int32_t filetypeID; // 0x45564157 'EVAW' ('WAVE')
+	uint32_t riffID; //  0x46464952 'FFIR' ('RIFF')
+	uint32_t fileSize; // 
+	uint32_t filetypeID; // 0x45564157 'EVAW' ('WAVE')
 };
 
 struct B_EXTENSION {
-	int32_t bextID; // 0x74786562 'txeb' ('bext')
-	int32_t bextSize;
+	uint32_t bextID; // 0x74786562 'txeb' ('bext')
+	uint32_t bextSize;
 };
 
 struct FORMAT {
-	int32_t formatID; // 0x20746d66 'tmf' ('fmt')
-	int32_t formatSize;
+	uint32_t formatID; // 0x20746d66 'tmf' ('fmt')
+	uint32_t formatSize;
 	short audioFormat;
 	short numChan;
-	int32_t smplRate;
-	int32_t byteRate;
+	uint32_t smplRate;
+	uint32_t byteRate;
 	short blockAlign;
 	short bps; // bits per sample
 };
 
 struct DATA {
-	int32_t dataID; // 0x61746164 = 'atad' ('data')
-	int32_t dataSize;
-	int32_t* dataChunk;
+	uint32_t dataID; // 0x61746164 = 'atad' ('data')
+	uint32_t dataSize;
+	char* dataChunk;
 }; 
 
 /* namespace audio { */

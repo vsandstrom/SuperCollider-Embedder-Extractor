@@ -13,8 +13,6 @@ int SuperColliderHeader::parseWaveHeader(){
 
 	junkSize = 0;
 	
-	char *bextChunk = 0; // ptr to store bext chunk
-	
 	// Don't assume the file has been opened
 	if (wave == nullptr) {
 		return 1;
@@ -59,9 +57,8 @@ int SuperColliderHeader::parseWaveHeader(){
 			printf("bext found\n");
 			b_extension.bextID = cursor;
 			fread(&b_extension.bextSize, 4, 1, wave);
-			// Unnecessary malloc and read of bext chunk already present in file
-			bextChunk = (char*)malloc(b_extension.bextSize);
-			fread(bextChunk, b_extension.bextSize, 1, wave);
+			// discard entire bextChunk, keep track of previous size.
+			fseek(wave, b_extension.bextSize, SEEK_CUR);
 			bextFound = true;
 
 		} else if ( cursor == 0x61746164 ) {
@@ -93,14 +90,15 @@ int SuperColliderHeader::parseWaveHeader(){
 	}
 
 
-	if (format.bps == 16) {
-		data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 4)); 
-		printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk));
-	}
-	else if (format.bps == 24) {
-		data.dataChunk = (int32_t*)malloc(4 * (data.dataSize / 6));
-		printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk));
-	}
+	data.dataChunk = (char*) malloc(data.dataSize); 
+	/* if (format.bps == 16) { */
+	/* 	data.dataChunk = (int32_t*)malloc((data.dataSize)); */ 
+	/* 	printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk)); */
+	/* } */
+	/* else if (format.bps == 24) { */
+	/* 	data.dataChunk = (int32_t*)malloc((data.dataSize)); */
+	/* 	printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk)); */
+	/* } */
 
 	fread(data.dataChunk, data.dataSize, 1, wave);
 
@@ -125,7 +123,7 @@ int SuperColliderHeader::parseSCD() {
 	bext = (char*)malloc(scdSize + (scdSize % 4));
 
 	// 
-	validBytes = fread(bext, sizeof(size_t), scdSize, scdFile);
+	validBytes = fread(bext, sizeof(unsigned char), scdSize, scdFile);
 	// printf("%s", bext);
 	printf("validBytes: %i\nscdsize: %i\n", validBytes, scdSize);
 	// Check if written bytes correspond to scdSize
@@ -145,10 +143,8 @@ int SuperColliderHeader::parseSCD() {
 int SuperColliderHeader::writeNewFile() {
 	// Compare current BEXT chunk size with the scdSize:
 	
-	int32_t sizeDiff = scdSize - b_extension.bextSize;
-	waveheader.fileSize += sizeDiff;
-
-
+	waveheader.fileSize += (scdSize - b_extension.bextSize);
+	b_extension.bextSize = scdSize;
 
 	FILE * outFile = fopen(path, "w");
 	if ( outFile == nullptr ){
@@ -162,10 +158,10 @@ int SuperColliderHeader::writeNewFile() {
 	if (fwrite(&waveheader, 4, 3, outFile) < 1) return 10;
 	if (fwrite(&format, 4, 5, outFile) < 1) return 12;
 	if (fwrite(&b_extension, 4, 2, outFile) < 1) return 13;
-	if (fwrite(bext, sizeof(scdSize), 1, outFile) < 1) return 14;
+	if (fwrite(bext, scdSize, 1, outFile) < 1) return 14;
 	if (fwrite(&data.dataID, 4, 1, outFile) < 1) return 15;
 	if (fwrite(&data.dataSize, 4, 1, outFile) < 1) return 16;
-	if (fwrite(data.dataChunk, 1, data.dataSize, outFile) < 1) return 17;
+	if (fwrite(data.dataChunk, data.dataSize, 1, outFile) < 1) return 17;
 
 	return 0;
 }
