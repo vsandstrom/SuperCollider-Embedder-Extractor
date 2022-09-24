@@ -1,4 +1,4 @@
-# Wave-file-Embedder-Extractor
+# SuperCollider Embedder/Extractor
 Embeds a file, preferably a text-file, into the BEXT-chunk of a wave-file header.
 
 This comes from the idea if there could be a way to ship the source code of a supercollider composition together with the sounding medium in a single file. 
