@@ -3,7 +3,7 @@ Embeds a file, preferably a text-file, into the BEXT-chunk of a wave-file header
 
 This comes from the idea if there could be a way to ship the source code of a supercollider composition together with the sounding medium in a single file. 
 
-To use the embedder do this: 
+To use the embedder: 
 ```bash
 $ scd_embed -a <audio-file> -s <supercollider-file> [ -o <output filename> ] [ -h <prints usage help> ]
 ```
