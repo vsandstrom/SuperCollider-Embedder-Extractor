@@ -5,7 +5,7 @@
 #include <malloc/_malloc.h>
 #include <string.h>
 
-#define macro
+#define SUFFIX_LEN 4
 
 
 int main(int argc, char** argv) {
@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
 	if (argc == 1 || argc > 7) {
 		printf("Wrong number of command line arguments\n\n%s", usage);
 		return -1;
+
 	}
 
 	// Skip name of program
@@ -29,23 +30,25 @@ int main(int argc, char** argv) {
 	// Parse CLI
 	while (argc > 0)  {
 		if (
-				!strcmp(*argv, "-a\0") ||
+				!strcmp(*argv, "-a") ||
 				!strcmp(*argv, "--audio") ||
 				!strcmp(*argv, "-A")) {
 			argv++;
 			audio_path = (char*)malloc(40);
 			strcpy( audio_path, *argv );
 			argc--;
+
 		} else if (
-				!strcmp(*argv, "-s\0") ||
+				!strcmp(*argv, "-s") ||
 				!strcmp(*argv, "--scd") ||
 				!strcmp(*argv, "-S")) {
 			argv++;
 			scd_path = (char*)malloc(40);
 			strcpy(scd_path, *argv);
 			argc--;
+
 		} else if (
-				!strcmp(*argv, "-o\0") ||
+				!strcmp(*argv, "-o") ||
 				!strcmp(*argv, "--output") ||
 				!strcmp(*argv, "-O")) {
 			argv++;
@@ -53,15 +56,18 @@ int main(int argc, char** argv) {
 			strcpy(out_path, *argv);
 			out = true;
 			argc--;
+
 		} else if (
 				!strcmp(*argv, "-h") ||
 				!strcmp(*argv, "--help") ||
 				!strcmp(*argv, "-H")) {
 			printf("%s\n", usage);
 			return 0;
+
 		} else {
 			argv++;
 			argc--;
+
 		}
 
 	}
@@ -72,11 +78,13 @@ int main(int argc, char** argv) {
 		if (audioFile == nullptr) {
 			printf("Path to audio-file was not correct\n\n%s", usage); 
 			return 1;
+
 		}
 		FILE* scdFile = fopen(scd_path, "r");
 		if (scdFile == nullptr) {
 			printf("Path to scd-file was not correct\n\n%s", usage); 
 			return 1;
+
 		} 
 	
 		// If no out_path was supplied, create one
@@ -87,8 +95,10 @@ int main(int argc, char** argv) {
 			// should be better with a char*
 			char *newPath = new char[len + 14];
 			strcpy(newPath, audio_path);
+
 			for (int i = 0, n = 15; i < n; i++) {
-				newPath[i + len - 4] = ending[i];
+				newPath[i + len - SUFFIX_LEN] = ending[i];
+
 			}
 			out_path = newPath;
 		}
