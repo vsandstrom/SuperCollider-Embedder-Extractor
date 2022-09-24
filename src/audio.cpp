@@ -1,4 +1,5 @@
 #include "audio.hpp"
+#include <_types/_uint32_t.h>
 #include <cstdio>
 #include <cstdint>
 #include <malloc/_malloc.h>
@@ -21,7 +22,7 @@ int SuperColliderHeader::parseWaveHeader(){
 	// Read the first header part into struct
 
 	fread(&cursor, 4, 1, wave);
-	if (cursor == 0x46464952) { // Check if file is RIFF
+	if (cursor == RIFF) { // Check if file is RIFF
 		// Allocate memory for the WAVEHEADER
 		waveheader.riffID = cursor;
 		fread(&waveheader.fileSize, 4, 1, wave);
@@ -37,21 +38,21 @@ int SuperColliderHeader::parseWaveHeader(){
 		
 		fread(&cursor, 4, 1, wave);
 
-		if ( cursor == 0x20746d66 ) {
+		if ( cursor == FMT ) {
 			// if fmt
 			
 			printf("fmt found\n");
 			
 			format.formatID = cursor;
-			fread(&format.formatSize, 4, 1, wave);
-			fread(&format.audioFormat, 2, 1, wave);
-			fread(&format.numChan, 2, 1, wave);
-			fread(&format.smplRate, 4, 1, wave);
-			fread(&format.byteRate, 4, 1, wave);
-			fread(&format.blockAlign, 2, 1, wave);
-			fread(&format.bps, 2, 1, wave);
+			fread(&format.formatSize, sizeof(uint32_t), 1, wave);
+			fread(&format.audioFormat, sizeof(uint16_t), 1, wave);
+			fread(&format.numChan, sizeof(uint16_t), 1, wave);
+			fread(&format.smplRate, sizeof(uint32_t), 1, wave);
+			fread(&format.byteRate, sizeof(uint32_t), 1, wave);
+			fread(&format.blockAlign, sizeof(uint16_t), 1, wave);
+			fread(&format.bps, sizeof(uint16_t), 1, wave);
 
-		} else if ( cursor == 0x74786562 ) { 
+		} else if ( cursor == BEXT ) { 
 			// if bext
 			
 			printf("bext found\n");
@@ -61,7 +62,7 @@ int SuperColliderHeader::parseWaveHeader(){
 			fseek(wave, b_extension.bextSize, SEEK_CUR);
 			bextFound = true;
 
-		} else if ( cursor == 0x61746164 ) {
+		} else if ( cursor == DATA ) {
 			// if data
 			
 			printf("data found\n");
@@ -90,15 +91,16 @@ int SuperColliderHeader::parseWaveHeader(){
 	}
 
 
-	data.dataChunk = (char*) malloc(data.dataSize); 
-	/* if (format.bps == 16) { */
-	/* 	data.dataChunk = (int32_t*)malloc((data.dataSize)); */ 
-	/* 	printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk)); */
-	/* } */
-	/* else if (format.bps == 24) { */
-	/* 	data.dataChunk = (int32_t*)malloc((data.dataSize)); */
-	/* 	printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk)); */
-	/* } */
+	/* data.dataChunk = (char*) malloc(data.dataSize); */ 
+
+	if (format.bps == 16) {
+		data.dataChunk = (char*)malloc((data.dataSize)); 
+		printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk));
+	}
+	else if (format.bps == 24) {
+		data.dataChunk = (char*)malloc((data.dataSize));
+		printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk));
+	}
 
 	fread(data.dataChunk, data.dataSize, 1, wave);
 
@@ -156,7 +158,19 @@ int SuperColliderHeader::writeNewFile() {
 	// TODO: error handling here:
 	// check if number of objects is same as written, (which is '1' on all counts)
 	if (fwrite(&waveheader, 4, 3, outFile) < 1) return 10;
-	if (fwrite(&format, 4, 5, outFile) < 1) return 12;
+
+	// 'fwrite' was real picky about type sizes here;
+	if (fwrite(&format.formatID, sizeof(uint32_t), 1, outFile) < 1 ||
+		fwrite(&format.formatSize, sizeof(uint32_t), 1, outFile) < 1 ||
+		fwrite(&format.audioFormat, sizeof(uint16_t), 1, outFile) < 1 ||
+		fwrite(&format.numChan, sizeof(uint16_t), 1, outFile) < 1 ||
+		fwrite(&format.smplRate, sizeof(uint32_t), 1, outFile) < 1 ||
+		fwrite(&format.byteRate, sizeof(uint32_t), 1, outFile) < 1 ||
+		fwrite(&format.blockAlign, sizeof(uint16_t), 1, outFile) < 1 ||
+		fwrite(&format.bps, sizeof(uint16_t), 1, outFile) < 1
+			) return 12;
+
+
 	if (fwrite(&b_extension, 4, 2, outFile) < 1) return 13;
 	if (fwrite(bext, scdSize, 1, outFile) < 1) return 14;
 	if (fwrite(&data.dataID, 4, 1, outFile) < 1) return 15;

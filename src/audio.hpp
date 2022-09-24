@@ -4,18 +4,23 @@
 
 #pragma once
 
-struct WAVEHEADER {
+#define RIFF 0x46464952
+#define FMT 0x20746d66
+#define BEXT 0x74786562
+#define DATA 0x61746164
+
+struct WaveHeader {
 	uint32_t riffID; //  0x46464952 'FFIR' ('RIFF')
-	uint32_t fileSize; // 
+	int32_t fileSize; // 
 	uint32_t filetypeID; // 0x45564157 'EVAW' ('WAVE')
 };
 
-struct B_EXTENSION {
+struct Bext {
 	uint32_t bextID; // 0x74786562 'txeb' ('bext')
 	uint32_t bextSize;
 };
 
-struct FORMAT {
+struct Format {
 	uint32_t formatID; // 0x20746d66 'tmf' ('fmt')
 	uint32_t formatSize;
 	short audioFormat;
@@ -26,9 +31,9 @@ struct FORMAT {
 	short bps; // bits per sample
 };
 
-struct DATA {
+struct Data {
 	uint32_t dataID; // 0x61746164 = 'atad' ('data')
-	uint32_t dataSize;
+	int32_t dataSize;
 	char* dataChunk;
 }; 
 
@@ -38,12 +43,12 @@ class SuperColliderHeader {
 	private:
 	FILE* wave, *scdFile;
 	char* bext;
-	uint32_t scdSize;
-	uint32_t junkSize;
-	WAVEHEADER waveheader;
-	B_EXTENSION b_extension;
-	FORMAT format;
-	DATA data;
+	int32_t scdSize;
+	int32_t junkSize;
+	WaveHeader waveheader;
+	Bext b_extension;
+	Format format;
+	Data data;
 	// Path for the output file to write to.
 	char* path;
 	

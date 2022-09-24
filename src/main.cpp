@@ -5,6 +5,8 @@
 #include <malloc/_malloc.h>
 #include <string.h>
 
+#define macro
+
 
 int main(int argc, char** argv) {
 
@@ -74,7 +76,7 @@ int main(int argc, char** argv) {
 			char *newPath = new char[len + 14];
 			strcpy(newPath, audio_path);
 			for (int i = 0, n = 15; i < n; i++) {
-				newPath[i + len - 1] = ending[i];
+				newPath[i + len - 4] = ending[i];
 			}
 			out_path = newPath;
 		}
