@@ -28,25 +28,37 @@ int main(int argc, char** argv) {
 
 	// Parse CLI
 	while (argc > 0)  {
-		if (!strcmp(*argv, "-a\0"))// || !strcmp(*argv, "--audio") || !strcmp(*argv, "--A"))
-		{
+		if (
+				!strcmp(*argv, "-a\0") ||
+				!strcmp(*argv, "--audio") ||
+				!strcmp(*argv, "-A")) {
 			argv++;
 			audio_path = (char*)malloc(40);
 			strcpy( audio_path, *argv );
 			argc--;
-		} else if (!strcmp(*argv, "-s\0")) //|| !strcmp(*argv, "--scd") || !strcmp(*argv, "-S"))
-		{
+		} else if (
+				!strcmp(*argv, "-s\0") ||
+				!strcmp(*argv, "--scd") ||
+				!strcmp(*argv, "-S")) {
 			argv++;
 			scd_path = (char*)malloc(40);
 			strcpy(scd_path, *argv);
 			argc--;
-		} else if (!strcmp(*argv, "-o\0")) // || !strcmp(*argv, "--output") || !strcmp(*argv, "-O"))
-		{
+		} else if (
+				!strcmp(*argv, "-o\0") ||
+				!strcmp(*argv, "--output") ||
+				!strcmp(*argv, "-O")) {
 			argv++;
 			out_path = (char*)malloc(40);
 			strcpy(out_path, *argv);
 			out = true;
 			argc--;
+		} else if (
+				!strcmp(*argv, "-h") ||
+				!strcmp(*argv, "--help") ||
+				!strcmp(*argv, "-H")) {
+			printf("%s\n", usage);
+			return 0;
 		} else {
 			argv++;
 			argc--;
