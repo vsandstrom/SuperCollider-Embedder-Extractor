@@ -5,7 +5,7 @@ This comes from the idea if there could be a way to ship the source code of a su
 
 To use the embedder: 
 ```bash
-$ scd_embed -a <audio-file> -s <supercollider-file> [ -o <output filename> ] [ -h <prints usage help> ]
+$ ./scd_embed -a <audio-file> -s <supercollider-file> [ -o <output filename> ] [ -h <prints usage help> ]
 ```
 
 
