@@ -15,7 +15,12 @@ int main(int argc, char** argv) {
 	char* out_path;
 	bool out = false;
 
-	char usage[] = {"Usage: \n    -a <audio-file (wave)>\n    -s <supercollider-file>\n    [-o <output path>]\n\n"};
+	char usage[] = {"Usage: \n"
+		"   -a  <audio-file (wave)>				 | [ --audio -A ]\n"
+		"   -s  <supercollider-file>			 | [ --scd, -S ]\n"
+		"  [-o  <output path>]					 | [ --output, -O ]\n"
+		"  [-h  <prints this usage message>]     | [ --help, -H ]\n\n"
+	};
 
 	if (argc == 1 || argc > 7) {
 		printf("Wrong number of command line arguments\n\n%s", usage);

@@ -1,3 +1,5 @@
+#include <cstdio>
+#include <cstring>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -50,26 +52,69 @@ int main(int argc, char** argv) {
 	Bextension bextHeader;
 	Data dataHeader;
 	int cursor;
+	char path[40];
+	char outpath[40];
+	bool out = false;
 
-	if (argc != 2) {
-		printf("wrong number of arguments\n");
+	char usage[] = {
+		"Usage: \n\n"
+
+		"    -e  <audio-file (wave)>				  | [ --extract, -E ]\n"
+		"   [-o  <output path>]					      | [ --output, -O ]\n"
+		"   [-h  <print this usage message>]		  | [ --help, -H ]\n\n"
+	};
+
+	if (argc < 3 || argc > 4) {
+		printf("wrong number of arguments\n\n%s", usage);
 		return 1;
 	}
+
+	argc--;
+	argv++;
+
+	while (argc > 0) {
+		if (!strcmp(*argv, "-e") || !strcmp(*argv, "--extract") || !strcmp(*argv, "-E")) {
+			argv++;
+			strcpy(path, *argv);
+			argc--;
+		} else if (!strcmp(*argv, "-o") || !strcmp(*argv, "--output") || !strcmp(*argv, "-O")) {
+			argv++;
+			strcpy(outpath, *argv);
+			out = true;
+			argc--;
+		} else if (!strcmp(*argv, "-h") || !strcmp(*argv, "--help") || !strcmp(*argv, "-H")) {
+			printf("%s", usage);
+		}
+	}
+
 	
 
-	char path[40];
 	sprintf(path, "./%s", argv[1]); // file opened must be in same directory as c program
 	printf("\n%s\n", path);
 	
 	FILE* wave = fopen(path, "r");
-	FILE* output = fopen("parsed.scd", "w");
 
-	if(wave == NULL) {
+	if(wave == nullptr) {
 		printf("unable to open file\n");
 		return 3;
 	} else {
 		printf("opened file successfully\n");
 	};
+
+	FILE* output;
+
+	if (out) {
+		output = fopen(outpath, "w");
+	} else {
+		output = fopen("parsed.scd", "w");
+	}
+	if(output == nullptr) {
+		printf("unable to open file\n");
+		return 3;
+	} else {
+		printf("opened file successfully\n");
+	};
+
 	// fread(&mainHeader, sizeof(struct WAVEHEADER), 1, wave);
 	fread(&cursor, 4, 1, wave);
 	if (cursor == RIFF) { // Check if file is RIFF
