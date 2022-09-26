@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
 		"   [-h  <print this usage message>]		  | [ --help, -H ]\n\n"
 	};
 
-	if (argc < 3 || argc > 4) {
+	if (argc < 3 || argc > 6) {
 		printf("wrong number of arguments\n\n%s", usage);
 		return 1;
 	}
@@ -84,17 +84,20 @@ int main(int argc, char** argv) {
 			argc--;
 		} else if (!strcmp(*argv, "-h") || !strcmp(*argv, "--help") || !strcmp(*argv, "-H")) {
 			printf("%s", usage);
+		} else {
+			argc--;
+			argv++;
 		}
 	}
 
 	
 
-	sprintf(path, "./%s", argv[1]); // file opened must be in same directory as c program
-	printf("\n%s\n", path);
+	/* sprintf(path, "./%s", argv[1]); // file opened must be in same directory as c program */
+	/* printf("\n%s\n", path); */
 	
 	FILE* wave = fopen(path, "r");
 
-	if(wave == nullptr) {
+	if ( wave == nullptr ) {
 		printf("unable to open file\n");
 		return 3;
 	} else {
@@ -108,6 +111,7 @@ int main(int argc, char** argv) {
 	} else {
 		output = fopen("parsed.scd", "w");
 	}
+
 	if(output == nullptr) {
 		printf("unable to open file\n");
 		return 3;
@@ -115,7 +119,6 @@ int main(int argc, char** argv) {
 		printf("opened file successfully\n");
 	};
 
-	// fread(&mainHeader, sizeof(struct WAVEHEADER), 1, wave);
 	fread(&cursor, 4, 1, wave);
 	if (cursor == RIFF) { // Check if file is RIFF
 
@@ -172,6 +175,7 @@ int main(int argc, char** argv) {
 				}
 			}
 			printf("\n");
+			break;
 
 		} else if ( cursor == 0x61746164 ) {
 			// if data
