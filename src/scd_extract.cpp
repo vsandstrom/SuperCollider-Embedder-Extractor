@@ -1,18 +1,11 @@
+#include "audio.hpp"
 #include <cstdio>
 #include <cstring>
-#include <stdlib.h>
-#include <stdio.h>
+#include <malloc/_malloc.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
-#include <time.h>
-#include <err.h>
-#include "audio.hpp"
-
-// TODO: check on fopen function.
-// TODO: solve infinite loop
 
 #define SUFFIX_LEN 4
+
 int main(int argc, char** argv) {
 	WaveHeader mainHeader;
 	Format fmtHeader;
@@ -69,12 +62,12 @@ int main(int argc, char** argv) {
 	FILE* output;
 
 	if (out) {
-		output = fopen(outpath, "xw");
+		output = fopen(outpath, "wx");
 	} else {
-		int len = strlen(outpath);
-		char ending[15] = "_parsed.wav\0";
+		int len = strlen(path);
+		char ending[15] = "_parsed.scd\0";
 		char* newPath = new char[len + 15];
-		strcpy(newPath, outpath);
+		strcpy(newPath, path);
 
 		for (int i = 0, n = 15; i < n; ++i) {
 			newPath[i + len - SUFFIX_LEN] = ending[i];
@@ -82,11 +75,11 @@ int main(int argc, char** argv) {
 
 
 		// Append "_parsed.scd" to input file name
-		output = fopen("parsed.scd", "xw");
+		output = fopen(newPath, "wx");
 	}
 
 	if( output == nullptr ) {
-		printf("Unable to open file or an output file with the same name already exists.\n");
+		printf("Unable to write to new file or an output file with the same name already exists.\n");
 		return 3;
 	} else {
 		printf("|-----> Opened file successfully\n");
@@ -163,4 +156,4 @@ int main(int argc, char** argv) {
 
 	return 0;
 
-};
+}

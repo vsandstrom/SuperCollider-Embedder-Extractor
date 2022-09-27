@@ -12,7 +12,7 @@ $ cd SuperCollider-Embedder-Extractor/
 
 # run compiler
 $ g++ -o scd_embed src/scd_embed.cpp src/audio.cpp\
-$ g++ -o scd_extract src/scd_extract.cpp
+$ g++ -o scd_extract src/scd_extract.cpp src/audio.cpp
 ```
 
 ## Usage
