@@ -59,7 +59,8 @@ int SuperColliderHeader::parseWaveHeader(){
 			b_extension.bextID = cursor;
 			fread(&b_extension.bextSize, 4, 1, wave);
 			// discard entire bextChunk, keep track of previous size.
-			fseek(wave, b_extension.bextSize, SEEK_CUR);
+			bextChunk = (char*)malloc(sizeof(char) * b_extension.bextSize);
+			fread(bextChunk, b_extension.bextSize, 1, wave);
 			bextFound = true;
 
 		} else if ( cursor == DATA ) {
@@ -179,6 +180,22 @@ int SuperColliderHeader::writeNewFile() {
 
 	return 0;
 }
+
+int SuperColliderHeader::writeParsedFile() {
+	char blank = ' ';
+
+	for (int i = 0, n = b_extension.bextSize; i < n; ++i) {
+		if (bextChunk[i] == 0x00) {
+			if (!fwrite(&blank, sizeof(char), 1, outputFile)) return 17;
+		}
+		else {
+			if (!fwrite(&bextChunk[i], sizeof(char), 1, outputFile)) return 17;
+		}
+	}
+
+
+	return 0;
+}
 	
 void SuperColliderHeader::error(int err) {
 	switch(err){
@@ -205,6 +222,10 @@ void SuperColliderHeader::error(int err) {
 		case 14: printf("Error occured when trying to write DATA-INFO ID"); break;
 		case 15: printf("Error occured when trying to write DATA-INFO SIZE"); break;
 		case 16: printf("Error occured when trying to write DATA ( Audio information )"); break;
+	
+		// Error messages for extraction
+		case 17: printf("Error occured when trying to write BEXT to scd-file"); break;
+		case 18: printf("Error occured during extraction"); break;
 
 
 	}
@@ -214,8 +235,13 @@ SuperColliderHeader::SuperColliderHeader(
 		FILE* wave, FILE* scdFile, char* path) : wave { wave }, scdFile { scdFile }, path {path}
 {};
 
+// Overloaded constructor for extraction only
+SuperColliderHeader::SuperColliderHeader(
+		FILE* wave, FILE* outputFile) : wave { wave }, outputFile { outputFile }
+{};
+
 SuperColliderHeader::~SuperColliderHeader() {
-	free(bext);
+	free(bextChunk);
 	free(data.dataChunk);
 }
 
@@ -238,6 +264,26 @@ int SuperColliderHeader::process() {
 		error(err); return 9;
 	}
 
+
+	free(bext);
+
+	return 0;
+}
+
+int SuperColliderHeader::extract() {
+	if (wave == nullptr || scdFile == nullptr) {
+		return 4;
+	}
+
+	int err;
+	err = parseWaveHeader();
+	if (err != 0) {
+		error(err); return 5;
+	}
+	err = writeParsedFile();
+	if (err != 0) {
+		error(err); return 18;
+	}
 
 	return 0;
 }

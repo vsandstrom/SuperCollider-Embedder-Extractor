@@ -41,8 +41,8 @@ struct Data {
 
 class SuperColliderHeader {
 	private:
-	FILE* wave, *scdFile;
-	char* bext;
+	FILE* wave, *scdFile, *outputFile;
+	char* bext, *bextChunk;
 	int32_t scdSize;
 	int32_t junkSize;
 	WaveHeader waveheader;
@@ -58,13 +58,18 @@ class SuperColliderHeader {
 
 	int writeNewFile();
 
-	void error(int err);
+	int writeParsedFile();
 
 	public:
 	SuperColliderHeader(FILE* wave, FILE* scdFile, char* path);
+	
+	// Overloaded constructor for extraction only
+	SuperColliderHeader(FILE* wave, FILE* scdFile);
 
 	~SuperColliderHeader();
 
 	int process();
+	int extract();
+	void error(int err);
 };
 /* } */

@@ -107,9 +107,14 @@ int main(int argc, char** argv) {
 			}
 			out_path = newPath;
 		}
+		int err;
 		
 		SuperColliderHeader sch(audioFile, scdFile, out_path);
-		sch.process();
+		err = sch.process();
+
+		if (err) {
+			sch.error(err); return err;
+		}
 
 		fclose(audioFile);
 		fclose(scdFile);
