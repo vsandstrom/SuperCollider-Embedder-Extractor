@@ -1,4 +1,0 @@
-.gitignore
-src/*
-src/a.out
-!src/*.*pp
