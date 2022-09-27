@@ -85,72 +85,15 @@ int main(int argc, char** argv) {
 		printf("|-----> Opened file successfully\n");
 	};
 
-	fread(&cursor, 4, 1, wave);
-	if (cursor == RIFF) { // Check if file is RIFF
+	int err;
 
-		mainHeader.riffID = cursor;
-		fread(&mainHeader.fileSize, 4, 1, wave);
-		fread(&mainHeader.filetypeID, 4, 1, wave);
+	SuperColliderHeader sch(wave, output);
 
-	} else {
-		printf("File format not recognized\n");
+	err = sch.extract();
+	if (err) {
+		sch.error(err); return err;
 	}
 
-	int flag = 0;
-	char *bextChunk = 0; // ptr to store bext chunk
-
-	while( flag != 1 ) {
-		// loop until 'data' chunk is found
-		
-		fread(&cursor, 4, 1, wave);
-
-		if ( cursor == FMT ) {
-			// if fmt
-			
-			fmtHeader.formatID = cursor;
-			fread(&fmtHeader.formatSize, 4, 1, wave);
-			fread(&fmtHeader.audioFormat, 2, 1, wave);
-			fread(&fmtHeader.numChan, 2, 1, wave);
-			fread(&fmtHeader.smplRate, 4, 1, wave);
-			fread(&fmtHeader.byteRate, 4, 1, wave);
-			fread(&fmtHeader.blockAlign, 2, 1, wave);
-			fread(&fmtHeader.bps, 2, 1, wave);
-
-		} else if ( cursor == BEXT ) { 
-			// if bext
-			
-			bextHeader.bextID = cursor;
-			fread(&bextHeader.bextSize, 4, 1, wave);
-			bextChunk = (char*)malloc(sizeof(char) * bextHeader.bextSize);
-			fread(bextChunk, bextHeader.bextSize, 1, wave);
-
-			char blank = ' ';
-
-			for(int i = 0, n = bextHeader.bextSize; i < n; ++i) {
-				if (bextChunk[i] == 0x00) {
-					fwrite(&blank, sizeof(char), 1, output);
-				} else {
-					fwrite(&bextChunk[i], sizeof(char), 1, output);
-				}
-			}
-			break;
-
-		} else if ( cursor == 0x61746164 ) {
-			// if data
-			
-			fread(&dataHeader.dataSize, 4, 1, wave);
-
-			flag = 1;
-
-		} else {
-			// if some junk chunk is trailing bext chunk
-			
-			fread(&cursor, 4, 1, wave); // read size of junk chunk
-			fseek(wave, cursor, SEEK_CUR); // skip junk chunk
-		}
-	} 
-
-	free(bextChunk);
 	fclose(wave);
 	fclose(output);
 
