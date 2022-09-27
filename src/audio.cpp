@@ -148,7 +148,7 @@ int SuperColliderHeader::writeNewFile() {
 	waveheader.fileSize += (scdSize - b_extension.bextSize);
 	b_extension.bextSize = scdSize;
 
-	FILE * outFile = fopen(path, "w");
+	FILE * outFile = fopen(path, "xw");
 	if ( outFile == nullptr ){
 		return 8;
 	}

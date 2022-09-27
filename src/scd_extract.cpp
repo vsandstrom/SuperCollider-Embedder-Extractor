@@ -7,49 +7,16 @@
 #include <math.h>
 #include <time.h>
 #include <err.h>
+#include "audio.hpp"
 
 // TODO: check on fopen function.
 // TODO: solve infinite loop
 
-#define RIFF 0x46464952
-#define WAVE 0x45564157
-#define FMT 0x20746d66
-#define BEXT 0x74786562
-#define DATA 0x61746164
-
-typedef struct  {
-	int riffID; //  0x46464952 'FFIR' ('RIFF')
-	int headerSize;
-	int filetypeID; // 0x45564157 'EVAW' ('WAVE')
-} WaveHeader;
-
-typedef struct  {
-	int bextID; // 0x74786562 'txeb' ('bext')
-	int bextSize;
-} Bextension;
-
-typedef struct {
-	int formatID; // 0x20746d66 'tmf' ('fmt')
-	int formatSize;
-	short audioFormat;
-	short numChan;
-	int smplRate;
-	int byteRate;
-	short blockAlign;
-	short bps; // bits per sample
-} Format;
-
-typedef struct {
-	int dataID; // 0x61746164 = 'atad' ('data')
-	int dataSize;
-	int32_t* dataChunk;
-} Data; 
-
-
+#define SUFFIX_LEN 4
 int main(int argc, char** argv) {
 	WaveHeader mainHeader;
 	Format fmtHeader;
-	Bextension bextHeader;
+	Bext bextHeader;
 	Data dataHeader;
 	int cursor;
 	char path[40];
@@ -65,7 +32,7 @@ int main(int argc, char** argv) {
 	};
 
 	if (argc < 3 || argc > 6) {
-		printf("wrong number of arguments\n\n%s", usage);
+		printf("Wrong number of arguments\n\n%s", usage);
 		return 1;
 	}
 
@@ -90,40 +57,46 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	
-
-	/* sprintf(path, "./%s", argv[1]); // file opened must be in same directory as c program */
-	/* printf("\n%s\n", path); */
-	
 	FILE* wave = fopen(path, "r");
 
 	if ( wave == nullptr ) {
-		printf("unable to open file\n");
+		printf("Unable to open input file for extraction\n");
 		return 3;
 	} else {
-		printf("opened file successfully\n");
+		printf("|-----> Opened input file successfully\n");
 	};
 
 	FILE* output;
 
 	if (out) {
-		output = fopen(outpath, "w");
+		output = fopen(outpath, "xw");
 	} else {
-		output = fopen("parsed.scd", "w");
+		int len = strlen(outpath);
+		char ending[15] = "_parsed.wav\0";
+		char* newPath = new char[len + 15];
+		strcpy(newPath, outpath);
+
+		for (int i = 0, n = 15; i < n; ++i) {
+			newPath[i + len - SUFFIX_LEN] = ending[i];
+		}
+
+
+		// Append "_parsed.scd" to input file name
+		output = fopen("parsed.scd", "xw");
 	}
 
-	if(output == nullptr) {
-		printf("unable to open file\n");
+	if( output == nullptr ) {
+		printf("Unable to open file or an output file with the same name already exists.\n");
 		return 3;
 	} else {
-		printf("opened file successfully\n");
+		printf("|-----> Opened file successfully\n");
 	};
 
 	fread(&cursor, 4, 1, wave);
 	if (cursor == RIFF) { // Check if file is RIFF
 
 		mainHeader.riffID = cursor;
-		fread(&mainHeader.headerSize, 4, 1, wave);
+		fread(&mainHeader.fileSize, 4, 1, wave);
 		fread(&mainHeader.filetypeID, 4, 1, wave);
 
 	} else {
@@ -153,35 +126,26 @@ int main(int argc, char** argv) {
 		} else if ( cursor == BEXT ) { 
 			// if bext
 			
-			printf("\nbext\n\n");
 			bextHeader.bextID = cursor;
 			fread(&bextHeader.bextSize, 4, 1, wave);
 			bextChunk = (char*)malloc(sizeof(char) * bextHeader.bextSize);
 			fread(bextChunk, bextHeader.bextSize, 1, wave);
-
-			/* output = malloc(sizeof(char) * bextHeader.bextSize); */
 
 			char blank = ' ';
 
 			for(int i = 0, n = bextHeader.bextSize; i < n; ++i) {
 				if (bextChunk[i] == 0x00) {
 					fwrite(&blank, sizeof(char), 1, output);
-//					printf(" ");
 				} else {
 					fwrite(&bextChunk[i], sizeof(char), 1, output);
-//					printf("%c", bextChunk[i]);
-					
-
 				}
 			}
-			printf("\n");
 			break;
 
 		} else if ( cursor == 0x61746164 ) {
 			// if data
 			
 			fread(&dataHeader.dataSize, 4, 1, wave);
-			printf("%i\n", dataHeader.dataSize);
 
 			flag = 1;
 
@@ -197,7 +161,6 @@ int main(int argc, char** argv) {
 	fclose(wave);
 	fclose(output);
 
-	
 	return 0;
 
 };
