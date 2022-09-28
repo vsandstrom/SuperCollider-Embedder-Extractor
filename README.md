@@ -28,10 +28,8 @@ To make sure that the text has been embedded, use:
 $ xxd -c 40 -l 5000 <path/to/file.wav>
 ```
 
-or use the free software [hex fiend](https://hexfiend.com/).
+or use the free software [hex fiend](https://hexfiend.com/).\\
 
-
-Reverse the process by extracting information into a separate file
 
 To use the extractor:
 ```bash
