@@ -28,7 +28,7 @@ To make sure that the text has been embedded, use:
 $ xxd -c 40 -l 5000 <path/to/file.wav>
 ```
 
-or use the free software [hex fiend](https://hexfiend.com/).\\
+or use the free software [hex fiend](https://hexfiend.com/).<br><br>
 
 
 To use the extractor:
