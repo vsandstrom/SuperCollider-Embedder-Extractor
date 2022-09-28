@@ -1,8 +1,8 @@
 #include "audio.hpp"
-#include <_types/_uint32_t.h>
 #include <cstdio>
 #include <cstdint>
-#include <malloc/_malloc.h>
+#include <cstdlib>
+
 
 // TODO: Understand why allocationg and parsing of data-chunk does not work properly
 

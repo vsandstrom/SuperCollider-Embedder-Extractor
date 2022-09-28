@@ -2,6 +2,7 @@
 #include "audio.hpp"
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
 #include <string.h>
 
 #define SUFFIX_LEN 4

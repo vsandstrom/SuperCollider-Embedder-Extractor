@@ -1,0 +1,3 @@
+src/*
+!src/*.*pp
+!README.md
