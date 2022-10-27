@@ -1,6 +1,6 @@
 cleanup: make
 	rm *.o
-	mkdir build
+	mkdir -p build
 	mv scd* ./build
 
 make: scd_embed.o scd_extract.o audio.o

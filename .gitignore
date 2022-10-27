@@ -1,3 +1,4 @@
+build/
 src/*
 !src/*.*pp
 !README.md

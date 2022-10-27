@@ -6,13 +6,9 @@ A silly project for embedding a file into another file and then extracting it. W
 # clone this repo
 $ git clone https://github.com/vsandstrom/SuperCollider-Embedder-Extractor.git 
 
-# move into repo
+# move into repo and run 'make', executables will end up in the 'build' directory
 $ cd SuperCollider-Embedder-Extractor/
-
-# run 'make' 
 $ make
-
-# files will end up in the 'build'-directory
 $ cd build
 ```
 
