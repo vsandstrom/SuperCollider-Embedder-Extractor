@@ -16,10 +16,10 @@ int main(int argc, char** argv) {
 	bool out = false;
 
 	char usage[] = {"Usage: \n"
-		"   -a  <audio-file (wave)>				 | [ --audio -A ]\n"
-		"   -s  <supercollider-file>			 | [ --scd, -S ]\n"
-		"  [-o  <output path>]					 | [ --output, -O ]\n"
-		"  [-h  <prints this usage message>]     | [ --help, -H ]\n\n"
+		"   -a  <audio-file (wave)>\t\t| [ --audio -A ]\n"
+		"   -s  <supercollider-file>\t\t| [ --scd, -S ]\n"
+		"  [-o  <output path>]\t\t\t| [ --output, -O ]\n"
+		"  [-h  <prints this usage message>]\t| [ --help, -H ]\n\n"
 	};
 
 	if (argc < 2 || argc > 7) {
@@ -83,13 +83,13 @@ int main(int argc, char** argv) {
 	// Proceed only if we have paths
 	if (audio_path && scd_path) {
 		FILE* audioFile = fopen(audio_path, "r");
-		if (audioFile == nullptr) {
+		if (audioFile == NULL) {
 			printf("Path to audio-file was not correct\n\n%s", usage); 
 			return 1;
 
 		}
 		FILE* scdFile = fopen(scd_path, "r");
-		if (scdFile == nullptr) {
+		if (scdFile == NULL) {
 			printf("Path to scd-file was not correct\n\n%s", usage); 
 			return 1;
 

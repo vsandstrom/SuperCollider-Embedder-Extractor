@@ -11,7 +11,7 @@ int SuperColliderHeader::parseWaveHeader(){
 
 	junkSize = 0;
 	
-	if (wave == nullptr) {
+	if (wave == NULL) {
 		return 1;
 	}
 
@@ -133,7 +133,7 @@ int SuperColliderHeader::writeNewFile() {
 	b_extension.bextSize = scdSize;
 
 	FILE * outFile = fopen(path, "wx");
-	if ( outFile == nullptr ){
+	if ( outFile == NULL ){
 		return 8;
 	}
 
@@ -211,13 +211,14 @@ void SuperColliderHeader::error(int err) {
 	}
 }
 
-SuperColliderHeader::SuperColliderHeader(
-		FILE* wave, FILE* scdFile, char* path) : wave { wave }, scdFile { scdFile }, path {path}
+SuperColliderHeader::SuperColliderHeader(FILE* wave, FILE* scdFile, char* path) : wave(wave), 
+                                                                                  scdFile(scdFile), 
+                                                                                  path(path) 
 {};
 
 // Overloaded constructor for extraction only
-SuperColliderHeader::SuperColliderHeader(
-		FILE* wave, FILE* outputFile) : wave { wave }, outputFile { outputFile }
+SuperColliderHeader::SuperColliderHeader(FILE* wave, FILE* outputFile) : wave(wave),
+                                                                         outputFile(outputFile)
 {};
 
 SuperColliderHeader::~SuperColliderHeader() {
@@ -227,7 +228,7 @@ SuperColliderHeader::~SuperColliderHeader() {
 
 
 int SuperColliderHeader::process() {
-	if (wave == nullptr || scdFile == nullptr) {
+	if (wave == NULL || scdFile == NULL) {
 		return 4;
 	}
 	int err;
@@ -251,7 +252,7 @@ int SuperColliderHeader::process() {
 }
 
 int SuperColliderHeader::extract() {
-	if (wave == nullptr || scdFile == nullptr) {
+	if (wave == NULL || scdFile == NULL) {
 		return 4;
 	}
 
