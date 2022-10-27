@@ -23,31 +23,47 @@ int main(int argc, char** argv) {
 		"   [-h  <print this usage message>]		  | [ --help, -H ]\n\n"
 	};
 
-	if (argc < 3 || argc > 6) {
+	if (argc < 2 || argc > 6) {
 		printf("Wrong number of arguments\n\n%s", usage);
+        printf("%i \n", argc);
 		return 1;
 	}
 
 	argc--;
 	argv++;
 
+    // TODO: if supplying only a 'flag' but no string, the program crashes with a segmentation fault.
 	while (argc > 0) {
-		if (!strcmp(*argv, "-e") || !strcmp(*argv, "--extract") || !strcmp(*argv, "-E")) {
+		if (
+                !strcmp(*argv, "-e") || 
+                !strcmp(*argv, "--extract") 
+                || !strcmp(*argv, "-E")) {
 			argv++;
+            if (*argv[0] == '-') return -1;
 			strcpy(path, *argv);
 			argc--;
-		} else if (!strcmp(*argv, "-o") || !strcmp(*argv, "--output") || !strcmp(*argv, "-O")) {
+		} else if (
+                !strcmp(*argv, "-o") || 
+                !strcmp(*argv, "--output") || 
+                !strcmp(*argv, "-O")) {
 			argv++;
+            if (*argv[0] == '-') return -1;
 			strcpy(outpath, *argv);
 			out = true;
 			argc--;
-		} else if (!strcmp(*argv, "-h") || !strcmp(*argv, "--help") || !strcmp(*argv, "-H")) {
+		} else if (
+                !strcmp(*argv, "-h") || 
+                !strcmp(*argv, "--help") || 
+                !strcmp(*argv, "-H")) {
 			printf("%s", usage);
+            return 0;
 		} else {
 			argc--;
 			argv++;
 		}
 	}
+    
+
 
 	FILE* wave = fopen(path, "r");
 

@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 		"  [-h  <prints this usage message>]     | [ --help, -H ]\n\n"
 	};
 
-	if (argc == 1 || argc > 7) {
+	if (argc < 2 || argc > 7) {
 		printf("Wrong number of command line arguments\n\n%s", usage);
 		return -1;
 
@@ -39,6 +39,7 @@ int main(int argc, char** argv) {
 				!strcmp(*argv, "--audio") ||
 				!strcmp(*argv, "-A")) {
 			argv++;
+            if (*argv[0] == '-') return -1;
 			audio_path = (char*)malloc(40);
 			strcpy( audio_path, *argv );
 			argc--;
@@ -48,6 +49,7 @@ int main(int argc, char** argv) {
 				!strcmp(*argv, "--scd") ||
 				!strcmp(*argv, "-S")) {
 			argv++;
+            if (*argv[0] == '-') return -1;
 			scd_path = (char*)malloc(40);
 			strcpy(scd_path, *argv);
 			argc--;
@@ -57,6 +59,7 @@ int main(int argc, char** argv) {
 				!strcmp(*argv, "--output") ||
 				!strcmp(*argv, "-O")) {
 			argv++;
+            if (*argv[0] == '-') return -1;
 			out_path = (char*)malloc(40);
 			strcpy(out_path, *argv);
 			out = true;

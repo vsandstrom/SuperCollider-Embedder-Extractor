@@ -8,6 +8,8 @@
 #define BEXT 0x74786562
 #define DATA 0x61746164
 
+#define NO_ERR 0
+
 struct WaveHeader {
 	uint32_t riffID; //  0x46464952 'FFIR' ('RIFF')
 	int32_t fileSize; // 
@@ -35,8 +37,6 @@ struct Data {
 	int32_t dataSize;
 	char* dataChunk;
 }; 
-
-/* namespace audio { */
 
 class SuperColliderHeader {
 	private:
@@ -71,4 +71,3 @@ class SuperColliderHeader {
 	int extract();
 	void error(int err);
 };
-/* } */
