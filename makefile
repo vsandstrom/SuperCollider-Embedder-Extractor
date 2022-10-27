@@ -1,3 +1,8 @@
+cleanup: make
+	rm *.o
+	mkdir build
+	mv scd* ./build
+
 make: scd_embed.o scd_extract.o audio.o
 	g++ -o scd_extract scd_extract.o audio.o
 	g++ -o scd_embed scd_embed.o audio.o
