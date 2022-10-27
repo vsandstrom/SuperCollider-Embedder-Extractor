@@ -19,7 +19,7 @@ To use the embedder:
 ```bash
 $ ./scd_embed -a <audio-file> -s <supercollider-file> [ -o <output filename> ] [ -h <prints usage help> ]
 ```
-Output filename is optional, if left blank 'scd_embed' will output the same filename as input, but with <filename>_embedded.wav added to it.
+Output filename is optional, if left blank 'scd_embed' will output the same filename as input, but with <br>'_embedded.wav' added to it.
 
 To make sure that the text has been embedded, use:
 
@@ -35,6 +35,7 @@ To use the extractor:
 ```bash
 $ ./scd_extract -e <target audio-file> [ -o <output filename> ] [ -h <prints usage help> ]
 ```
-Output filename is optional, if left blank 'scd_embed' will output the same filename as input, but with <filename>_parsed.scd added to it.
+Output filename is optional, if left blank 'scd_embed' will output the same filename as input, but with <br>'_parsed.scd'
+added to it.
 
 This could also be used to parse any BEXT-chunk, if you are curious what it usually contains.
