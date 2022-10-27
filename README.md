@@ -2,8 +2,6 @@
 A silly project for embedding a file into another file and then extracting it. What if you could hide the SuperCollider source code of your music as an easter egg inside the music it has created? 
 
 ## Compile
-A requirement seems to be g++-11 or later
-
 ```bash
 # clone this repo
 $ git clone https://github.com/vsandstrom/SuperCollider-Embedder-Extractor.git 
@@ -11,9 +9,11 @@ $ git clone https://github.com/vsandstrom/SuperCollider-Embedder-Extractor.git
 # move into repo
 $ cd SuperCollider-Embedder-Extractor/
 
-# run compiler
-$ g++ -o scd_embed src/scd_embed.cpp src/audio.cpp
-$ g++ -o scd_extract src/scd_extract.cpp src/audio.cpp
+# run 'make' 
+$ make
+
+# files will end up in the 'build'-directory
+$ cd build
 ```
 
 ## Usage
