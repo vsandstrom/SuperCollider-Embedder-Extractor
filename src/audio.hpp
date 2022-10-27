@@ -70,8 +70,4 @@ class SuperColliderHeader {
 	int process();
 	int extract();
 	void error(int err);
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> bbab1c012932d73cedfa18d4bcdbc95669d87c4c
