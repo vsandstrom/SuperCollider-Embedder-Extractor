@@ -127,8 +127,8 @@ int SuperColliderHeader::parseSCD() {
 }
 
 int SuperColliderHeader::writeNewFile() {
-	// Compare current BEXT chunk size with the scdSize:
 	
+	// Compare current BEXT chunk size with the scdSize:
 	waveheader.fileSize += (scdSize - b_extension.bextSize);
 	b_extension.bextSize = scdSize;
 
@@ -137,10 +137,19 @@ int SuperColliderHeader::writeNewFile() {
 		return 8;
 	}
 
+<<<<<<< HEAD
 	if (fwrite(&waveheader, 4, 3, outFile) < 1) return 10;
 
 	// 'fwrite' was real picky about type sizes here;
     // should be solved by an __attribute__((packed)) on format-struct
+=======
+	// WRITE NEW FILE TO DISK!
+
+	if (fwrite(&waveheader, 4, 3, outFile) < 1) return 10;
+
+	// 'fwrite' was real picky about type sizes here;
+	// Should be solved with an __attribute__((packed)) on format struct
+>>>>>>> bbab1c012932d73cedfa18d4bcdbc95669d87c4c
 	if (fwrite(&format.formatID, sizeof(uint32_t), 1, outFile) < 1 ||
 		fwrite(&format.formatSize, sizeof(uint32_t), 1, outFile) < 1 ||
 		fwrite(&format.audioFormat, sizeof(uint16_t), 1, outFile) < 1 ||
