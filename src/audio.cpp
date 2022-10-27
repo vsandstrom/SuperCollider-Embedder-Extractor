@@ -3,9 +3,6 @@
 #include <cstdint>
 #include <cstdlib>
 
-
-// TODO: Understand why allocationg and parsing of data-chunk does not work properly
-
 int SuperColliderHeader::parseWaveHeader(){
 	uint32_t cursor;
 
@@ -14,7 +11,6 @@ int SuperColliderHeader::parseWaveHeader(){
 
 	junkSize = 0;
 	
-	// Don't assume the file has been opened
 	if (wave == nullptr) {
 		return 1;
 	}
@@ -33,7 +29,6 @@ int SuperColliderHeader::parseWaveHeader(){
 	}
 	
 	while (!dataFound) {
-		/* bool bextFound = false; */
 		// loop until 'data' chunk is found
 		
 		fread(&cursor, 4, 1, wave);
@@ -91,9 +86,6 @@ int SuperColliderHeader::parseWaveHeader(){
 		b_extension.bextSize = 0;
 	}
 
-
-	/* data.dataChunk = (char*) malloc(data.dataSize); */ 
-
 	if (format.bps == 16) {
 		data.dataChunk = (char*)malloc((data.dataSize)); 
 		printf("Allocated data-chunk %lu\n", sizeof(data.dataChunk));
@@ -125,7 +117,6 @@ int SuperColliderHeader::parseSCD() {
 	// Allign to next 32bit block
 	bext = (char*)malloc(scdSize + (scdSize % 4));
 
-	// 
 	validBytes = fread(bext, sizeof(unsigned char), scdSize, scdFile);
 	// printf("%s", bext);
 	printf("validBytes: %i\nscdsize: %i\n", validBytes, scdSize);
@@ -135,17 +126,12 @@ int SuperColliderHeader::parseSCD() {
 	}
 
 	printf("%s\n", bext);
-
-	// Pad the end of the file with NULL
-	/* for (int i = scdSize+1, n = scdSize + (scdSize % 4); i < n; i++){ */
-	/* 	bext[i] = 0x00; */
-	/* } */
 	return 0;
 }
 
 int SuperColliderHeader::writeNewFile() {
-	// Compare current BEXT chunk size with the scdSize:
 	
+	// Compare current BEXT chunk size with the scdSize:
 	waveheader.fileSize += (scdSize - b_extension.bextSize);
 	b_extension.bextSize = scdSize;
 
@@ -156,11 +142,10 @@ int SuperColliderHeader::writeNewFile() {
 
 	// WRITE NEW FILE TO DISK!
 
-	// TODO: error handling here:
-	// check if number of objects is same as written, (which is '1' on all counts)
 	if (fwrite(&waveheader, 4, 3, outFile) < 1) return 10;
 
 	// 'fwrite' was real picky about type sizes here;
+	// Should be solved with an __attribute__((packed)) on format struct
 	if (fwrite(&format.formatID, sizeof(uint32_t), 1, outFile) < 1 ||
 		fwrite(&format.formatSize, sizeof(uint32_t), 1, outFile) < 1 ||
 		fwrite(&format.audioFormat, sizeof(uint16_t), 1, outFile) < 1 ||

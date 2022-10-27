@@ -36,8 +36,6 @@ struct Data {
 	char* dataChunk;
 }; 
 
-/* namespace audio { */
-
 class SuperColliderHeader {
 	private:
 	FILE* wave, *scdFile, *outputFile;
@@ -71,4 +69,3 @@ class SuperColliderHeader {
 	int extract();
 	void error(int err);
 };
-/* } */
