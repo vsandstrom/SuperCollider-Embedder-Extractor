@@ -2,6 +2,13 @@
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
+#include <sys/_types/_int32_t.h>
+
+#ifdef DEBUG
+    #define D(x) x
+#else
+    #define D(x) 
+#endif
 
 int SuperColliderHeader::parseWaveHeader(){
 	uint32_t cursor;
@@ -122,18 +129,24 @@ int SuperColliderHeader::parseSCD() {
 		return 3;
 	}
 
-	printf("%s\n", bext);
+	D(printf("%s\n", bext));
 	return 0;
 }
 
 int SuperColliderHeader::writeNewFile() {
+    int32_t padding = 0;
+    char space = ' ';
 	
 	// Compare current BEXT chunk size with the scdSize:
-	waveheader.fileSize += (scdSize - b_extension.bextSize);
-	b_extension.bextSize = scdSize;
+    if (scdSize % 4 != 0) {
+        padding = scdSize % 4;
+    }
+	waveheader.fileSize += (scdSize - b_extension.bextSize + padding);
+	b_extension.bextSize = scdSize + padding;
 
 	FILE * outFile = fopen(path, "wx");
 	if ( outFile == NULL ){
+        // returns an error if the file already exists
 		return 8;
 	}
 
@@ -154,6 +167,10 @@ int SuperColliderHeader::writeNewFile() {
 
 	if (fwrite(&b_extension, 4, 2, outFile) < 1) return 13;
 	if (fwrite(bext, scdSize, 1, outFile) < 1) return 14;
+    if (padding) {
+        // TODO: not error checked
+        fwrite(&space, sizeof(char), padding, outFile);
+    }
 	if (fwrite(&data.dataID, 4, 1, outFile) < 1) return 15;
 	if (fwrite(&data.dataSize, 4, 1, outFile) < 1) return 16;
 	if (fwrite(data.dataChunk, data.dataSize, 1, outFile) < 1) return 17;
@@ -180,34 +197,33 @@ int SuperColliderHeader::writeParsedFile() {
 void SuperColliderHeader::error(int err) {
 	switch(err){
 		// Class initialization errors
-		case 4: printf("An attempt to run process function before object initialization, object has not been passed a FILE*"); break;
+        case 4: printf("Error %i: An attempt to run process function before object initialization, object has not been passed a FILE*\n", err); break;
 
 		// Error messages for Wave file
-		case 1: printf("File had not been opened successfully"); break;
-		case 2: printf("File format not recognized\n"); break;
-		case 5: printf("---> parseWaveHeader-function was not successful."); break;
-		case 7: printf("Error occurred when allocating memory for data-chunk"); break;
+		case 1: printf("Error %i: File had not been opened successfully\n", err); break;
+		case 2: printf("Error %i: File format not recognized\n\n", err); break;
+		case 5: printf("Error %i: ---> parseWaveHeader-function was not successful.\n", err); break;
+		case 7: printf("Error %i: occurred when allocating memory for data-chunk\n", err); break;
 
 		// Error messages for SCD file
-		case 6: printf("---> parseSCD-function was not successful."); break;
-		case 3: printf("An error occurred when attempting to read entire SuperCollider file to memory."); break;
+        case 6: printf("Error %i: ---> parseSCD-function was not successful.\n", err); break;
+		case 3: printf("Error %i: occurred when attempting to read entire SuperCollider file to memory.\n", err); break;
 
 		// Error messages for output file
-		case 8: printf("Error when trying to initiate writing output file"); break;
-		case 9: printf("Error occured when trying to write new file"); break;
-		case 10: printf("Error occured when trying to write WAVEHEADER"); break;
-		case 11: printf("Error occured when trying to write FORMAT"); break;
-		case 12: printf("Error occured when trying to write BEXT-INFO"); break;
-		case 13: printf("Error occured when trying to write BEXT-DATA ( embedded SuperCollider file )"); break;
-		case 14: printf("Error occured when trying to write DATA-INFO ID"); break;
-		case 15: printf("Error occured when trying to write DATA-INFO SIZE"); break;
-		case 16: printf("Error occured when trying to write DATA ( Audio information )"); break;
+		case 8: printf("Error %i: occured when trying to write a new file or if the file already exists\n", err); break;
+		case 9: printf("Error %i: occured when trying to write new file\n", err); break;
+		case 10: printf("Error %i: occured when trying to write WAVEHEADER\n", err); break;
+		case 11: printf("Error %i: occured when trying to write FORMAT\n", err); break;
+		case 12: printf("Error %i: occured when trying to write BEXT-INFO\n", err); break;
+		case 13: printf("Error %i: occured when trying to write BEXT-DATA ( embedded SuperCollider file )\n", err); break;
+		case 14: printf("Error %i: occured when trying to write DATA-INFO ID\n", err); break;
+		case 15: printf("Error %i: occured when trying to write DATA-INFO SIZE\n", err); break;
+		case 16: printf("Error %i: occured when trying to write DATA ( Audio information )\n", err); break;
 	
 		// Error messages for extraction
-		case 17: printf("Error occured when trying to write BEXT to scd-file"); break;
-		case 18: printf("Error occured during extraction"); break;
-
-
+        case 17: printf("Error %i: occured when trying to write BEXT to scd-file\n", err); break;
+		case 18: printf("Error %i: occured during extraction\n", err); break;
+        case 19: printf("Error %i: writing padding in bext chunk\n", err); break;
 	}
 }
 

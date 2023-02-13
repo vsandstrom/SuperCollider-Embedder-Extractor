@@ -35,8 +35,8 @@ int main(int argc, char** argv) {
 	while (argc > 0) {
 		if (
                 !strcmp(*argv, "-e") || 
-                !strcmp(*argv, "--extract") 
-                || !strcmp(*argv, "-E")) {
+                !strcmp(*argv, "--extract") || 
+                !strcmp(*argv, "-E")) {
 			argv++;
             if (*argv[0] == '-') return -1;
 			strcpy(path, *argv);

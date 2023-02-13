@@ -36,7 +36,7 @@ struct Data {
 	uint32_t dataID; // 0x61746164 = 'atad' ('data')
 	int32_t dataSize;
 	char* dataChunk;
-}; 
+};
 
 class SuperColliderHeader {
 	private:
